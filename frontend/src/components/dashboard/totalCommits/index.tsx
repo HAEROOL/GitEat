@@ -6,8 +6,8 @@ export function TotalCommits() {
   const { repoId } = useParams();
   const { data } = useGetTotalCommit(repoId as string);
   const totalCommit = useMemo(() => {
-    return data.total_commit.toLocaleString();
-  }, [data.totalCommits]);
+    return data.totalCommit.toLocaleString();
+  }, [data.totalCommit]);
   return (
     <div className="w-full flex justify-between px-10 py-5 bg-white rounded-lg h-full items-center">
       <span className="text-xl font-bold">Commit 수 🚀 </span>

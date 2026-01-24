@@ -105,7 +105,24 @@ export function DiffViewer({
     return extendData;
   };
 
-  const diff = useMemo(() => getDiffFile(), [oldCode, newCode]);
+  /* eslint-disable no-console */
+  const startTotal = performance.now();
+  const diff = useMemo(() => {
+    const startCalc = performance.now();
+    const result = getDiffFile();
+    const endCalc = performance.now();
+    console.log(
+      `[Diff Calculation] Execution time: ${(endCalc - startCalc).toFixed(4)}ms`
+    );
+    return result;
+  }, [oldCode, newCode]);
+  const endTotal = performance.now();
+  console.log(
+    `[Diff Operation] Total time (including memoization check): ${(
+      endTotal - startTotal
+    ).toFixed(4)}ms`
+  );
+  /* eslint-enable no-console */
   const parsedComments = useMemo(() => {
     return parseComments(comments);
   }, [comments]);

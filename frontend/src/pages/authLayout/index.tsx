@@ -11,15 +11,25 @@ export function AuthLayout() {
   const { setUser } = useLoginStore();
 
   const { data, isLoading, refetch } = useGetMe();
+
+  // 개발 모드에서는 자동으로 목업 사용자 데이터 설정
   useEffect(() => {
-    refetch();
+    if (import.meta.env.MODE === "development") {
+      // 목업 데이터 사용
+      refetch();
+    }
   }, []);
+
   useEffect(() => {
     if (!isLoading && data) {
       setUser(data);
     }
   }, [data, isLoading]);
-  return isLogin ? (
+
+  // 개발 모드에서는 항상 인증된 것으로 처리
+  const shouldAllowAccess = import.meta.env.MODE === "development" || isLogin;
+
+  return shouldAllowAccess ? (
     <div>
       <Header />
       <div className="flex justify-end">

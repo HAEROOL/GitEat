@@ -15,10 +15,24 @@ export function Login() {
     const gitLabAuthUrl = `https://lab.ssafy.com/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code`;
     window.location.href = gitLabAuthUrl;
   };
-  const { setUser } = useLoginStore();
+  const { setUser, setLogin } = useLoginStore();
   const { data, isLoading, refetch } = useGetMe();
 
   const navigation = useNavigate();
+
+  // 개발 모드에서는 자동으로 목업 데이터로 로그인 처리하고 /repos로 이동
+  useEffect(() => {
+    if (import.meta.env.MODE === "development") {
+      setLogin();
+      refetch().then((result) => {
+        if (result.data) {
+          setUser(result.data);
+          navigation("/repos");
+        }
+      });
+    }
+  }, []);
+
   useEffect(() => {
     if (localStorage.getItem("access_token")) {
       refetch();

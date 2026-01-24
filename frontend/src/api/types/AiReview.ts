@@ -1,5 +1,4 @@
-export type AiReivew = [
-  {
+export type AiReivew = {
     aiReviewId: number;
     repoId: number;
     prId: number;
@@ -8,5 +7,4 @@ export type AiReivew = [
     headSha: string;
     content: string;
     createTime: number[];
-  },
-];
+  }[];

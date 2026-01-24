@@ -47,14 +47,12 @@ interface ChartProps {
     totalCommit: number;
     totalMergeRequest: number;
     totalComment: number;
-    weeklyInfo: [
-      {
+    weeklyInfo: {
         week: number;
         mergeRequestCount: number;
         commitCount: number;
         commentCount: number;
-      },
-    ];
+      }[];
   };
   maxValue?: number;
 }

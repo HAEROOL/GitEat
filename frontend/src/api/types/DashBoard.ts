@@ -23,8 +23,7 @@ export type CommentStatistics = {
 };
 
 export type Contributors = {
-  contributors: [
-    {
+  contributors: {
       userId: number;
       name: string;
       userName: string;
@@ -32,14 +31,11 @@ export type Contributors = {
       totalCommit: number;
       totalMergeRequest: number;
       totalComment: number;
-      weeklyInfo: [
-        {
+      weeklyInfo: {
           week: number;
           mergeRequestCount: number;
           commitCount: number;
           commentCount: number;
-        },
-      ];
-    },
-  ];
+        }[];
+    }[];
 };

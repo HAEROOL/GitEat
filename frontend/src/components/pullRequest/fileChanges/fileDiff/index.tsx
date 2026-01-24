@@ -8,6 +8,9 @@ import { useGetRawFile } from "../../../../api/queries/useGetRawFile";
 import { useEffect } from "react";
 import { useBooleanState } from "../../../../hooks/useBooleanState";
 import { usePRStore } from "../../../../store/pullRequestStore";
+import { useMemo } from "react";
+import { generateDiffFile } from "@git-diff-view/file";
+import { getFileType } from "../../../../utils/getFileType";
 
 interface FileProps {
   repoId: number;
@@ -19,13 +22,29 @@ interface FileProps {
 const getFileStatusInfo = (status: number) => {
   switch (status) {
     case 1:
-      return { label: "Added", color: "success" as const, bgColor: "bg-green-50" };
+      return {
+        label: "Added",
+        color: "success" as const,
+        bgColor: "bg-green-50",
+      };
     case 2:
-      return { label: "Modified", color: "primary" as const, bgColor: "bg-blue-50" };
+      return {
+        label: "Modified",
+        color: "primary" as const,
+        bgColor: "bg-blue-50",
+      };
     case 3:
-      return { label: "Deleted", color: "error" as const, bgColor: "bg-red-50" };
+      return {
+        label: "Deleted",
+        color: "error" as const,
+        bgColor: "bg-red-50",
+      };
     default:
-      return { label: "Unknown", color: "default" as const, bgColor: "bg-gray-50" };
+      return {
+        label: "Unknown",
+        color: "default" as const,
+        bgColor: "bg-gray-50",
+      };
   }
 };
 
@@ -40,6 +59,33 @@ export function FileDiff({ repoId, prId, file }: FileProps) {
       getFile(file);
     }
   }, [isExpand]);
+
+  /* eslint-disable no-console */
+  const diff = useMemo(() => {
+    if (!rawFile) return null;
+
+    const startCalc = performance.now();
+    const instance = generateDiffFile(
+      "oldFileName",
+      rawFile.oldCode === null ? "" : rawFile.oldCode,
+      "newFileName",
+      rawFile.newCode === null ? "" : rawFile.newCode,
+      getFileType(file.oldPath),
+      getFileType(file.newPath)
+    );
+    instance.init();
+    instance.buildSplitDiffLines();
+    instance.buildUnifiedDiffLines();
+    const endCalc = performance.now();
+
+    console.log(
+      `[Diff Calculation - Parent] ${file.fileName} Execution time: ${(
+        endCalc - startCalc
+      ).toFixed(4)}ms`
+    );
+    return instance;
+  }, [rawFile, file]);
+  /* eslint-enable no-console */
 
   return (
     <Accordion
@@ -71,12 +117,13 @@ export function FileDiff({ repoId, prId, file }: FileProps) {
         {rawFile && (
           <AccordionDetails>
             <ErrorBoundary>
-              <DiffViewer
-                oldCode={rawFile.oldCode !== null ? rawFile.oldCode : ""}
-                newCode={rawFile.newCode !== null ? rawFile.newCode : ""}
-                comments={comments.filter((comment) => comment.position)}
-                file={file}
-              />
+              {diff && (
+                <DiffViewer
+                  diff={diff}
+                  comments={comments.filter((comment) => comment.position)}
+                  file={file}
+                />
+              )}
             </ErrorBoundary>
           </AccordionDetails>
         )}

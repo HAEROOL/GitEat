@@ -1,40 +1,18 @@
 import { DiffView, DiffModeEnum, DiffFile } from "@git-diff-view/react";
-import { generateDiffFile } from "@git-diff-view/file";
 import "@git-diff-view/react/styles/diff-view.css";
 import { useMemo } from "react";
 import { FileMarkDownEditor } from "../fileMarkDownEditor";
 import { CommentThread } from "../commentThread";
 import { ChangedFile } from "../../../../api/types/ChangedFile";
 import { Comment } from "../../../../api/types/Comment";
-import { getFileType } from "../../../../utils/getFileType";
 
 interface DiffViewerProps {
-  oldCode: string;
-  newCode: string;
+  diff: DiffFile;
   comments: Comment[];
   file: ChangedFile;
 }
 
-export function DiffViewer({
-  oldCode,
-  newCode,
-  comments,
-  file,
-}: DiffViewerProps) {
-  const getDiffFile = () => {
-    const instance = generateDiffFile(
-      "oldFileName",
-      oldCode === null ? "" : oldCode,
-      "newFileName",
-      newCode === null ? "" : newCode,
-      getFileType(file.oldPath),
-      getFileType(file.newPath)
-    );
-    instance.init();
-    instance.buildSplitDiffLines();
-    instance.buildUnifiedDiffLines();
-    return instance;
-  };
+export function DiffViewer({ diff, comments, file }: DiffViewerProps) {
   const getLinesAndType = (
     side: number,
     diffFile: DiffFile,
@@ -107,18 +85,10 @@ export function DiffViewer({
 
   /* eslint-disable no-console */
   const startTotal = performance.now();
-  const diff = useMemo(() => {
-    const startCalc = performance.now();
-    const result = getDiffFile();
-    const endCalc = performance.now();
-    console.log(
-      `[Diff Calculation] Execution time: ${(endCalc - startCalc).toFixed(4)}ms`
-    );
-    return result;
-  }, [oldCode, newCode]);
+  // diff is now passed as a prop, ensuring it survives as long as the parent is mounted.
   const endTotal = performance.now();
   console.log(
-    `[Diff Operation] Total time (including memoization check): ${(
+    `[Diff Viewer] Execution total (including prop access): ${(
       endTotal - startTotal
     ).toFixed(4)}ms`
   );

@@ -1,5 +1,9 @@
-import { Accordion, AccordionSummary, Chip } from "@mui/material";
-import AccordionDetails from "@mui/material/AccordionDetails";
+import { Chip } from "@mui/material";
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+} from "../../../common/Accordion";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { ErrorBoundary } from "../../../common/errorBoundery";
 import { DiffViewer } from "../diffViewer";
@@ -95,39 +99,35 @@ export function FileDiff({ repoId, prId, file }: FileProps) {
       className={`w-full ${statusInfo.bgColor}`}
       onChange={() => setReverse()}
     >
-      <div className="flex justify-between items-center w-full">
-        <AccordionSummary
-          expandIcon={<ArrowDropDownIcon />}
-          aria-controls="panel1-content"
-          id="panel1-header"
-          className="w-full"
-        >
-          <div className="flex items-center gap-3 w-full">
-            <h2 className="text-lg font-bold truncate">{file.newPath}</h2>
-            <Chip
-              label={statusInfo.label}
-              color={statusInfo.color}
-              size="small"
-              variant="outlined"
-            />
-          </div>
-        </AccordionSummary>
-      </div>
-      <div className="flex mt-4">
-        {rawFile && (
-          <AccordionDetails>
-            <ErrorBoundary>
-              {diff && (
-                <DiffViewer
-                  diff={diff}
-                  comments={comments.filter((comment) => comment.position)}
-                  file={file}
-                />
-              )}
-            </ErrorBoundary>
-          </AccordionDetails>
-        )}
-      </div>
+      <AccordionSummary
+        expandIcon={<ArrowDropDownIcon />}
+        id="panel1-header"
+        className="w-full"
+      >
+        <div className="flex items-center gap-3 w-full">
+          <h2 className="text-lg font-bold truncate">{file.newPath}</h2>
+          <Chip
+            label={statusInfo.label}
+            color={statusInfo.color}
+            size="small"
+            variant="outlined"
+          />
+        </div>
+      </AccordionSummary>
+      {rawFile && (
+        <AccordionDetails>
+          <ErrorBoundary>
+            {diff && (
+              <DiffViewer
+                diff={diff}
+                comments={comments.filter((comment) => comment.position)}
+                file={file}
+              />
+            )}
+          </ErrorBoundary>
+        </AccordionDetails>
+      )}
     </Accordion>
   );
 }
+

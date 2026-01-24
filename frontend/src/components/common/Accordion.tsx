@@ -1,4 +1,11 @@
-import React from "react";
+import React, { createContext, useContext } from "react";
+
+interface AccordionContextType {
+  expanded: boolean;
+  toggle: (event: React.SyntheticEvent) => void;
+}
+
+const AccordionContext = createContext<AccordionContextType | null>(null);
 
 interface AccordionProps {
   expanded?: boolean;
@@ -9,35 +16,35 @@ interface AccordionProps {
 }
 
 export const Accordion = ({
-  expanded,
+  expanded = false,
   onChange,
   children,
   className = "",
   id,
 }: AccordionProps) => {
+  console.log("Accordion rendered, expanded:", expanded);
+  
+  const toggle = (event: React.SyntheticEvent) => {
+    if (onChange) {
+      onChange(event, !expanded);
+    }
+  };
+
   return (
-    <div
-      id={id}
-      className={`border border-gray-200 rounded-lg overflow-hidden mb-2 bg-white ${className}`}
-    >
-      {React.Children.map(children, (child) => {
-        if (React.isValidElement(child)) {
-          return React.cloneElement(child, {
-            expanded,
-            onChange,
-          });
-        }
-        return child;
-      })}
-    </div>
+    <AccordionContext.Provider value={{ expanded, toggle }}>
+      <div
+        id={id}
+        className={`border border-gray-200 rounded-lg overflow-hidden mb-2 bg-white ${className}`}
+      >
+        {children}
+      </div>
+    </AccordionContext.Provider>
   );
 };
 
 interface AccordionSummaryProps {
   children: React.ReactNode;
   expandIcon?: React.ReactNode;
-  expanded?: boolean;
-  onChange?: (event: React.SyntheticEvent, expanded: boolean) => void;
   className?: string;
   id?: string;
 }
@@ -45,27 +52,28 @@ interface AccordionSummaryProps {
 export const AccordionSummary = ({
   children,
   expandIcon,
-  expanded,
-  onChange,
   className = "",
   id,
 }: AccordionSummaryProps) => {
-  const handleClick = (event: React.MouseEvent) => {
-    if (onChange) {
-      onChange(event, !expanded);
-    }
-  };
+  const context = useContext(AccordionContext);
+  if (!context) {
+    throw new Error("AccordionSummary must be used within Accordion");
+  }
+
+  const { expanded, toggle } = context;
+  
+  console.log("AccordionSummary rendered, expanded:", expanded);
 
   return (
     <div
       id={id}
       className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 select-none ${className}`}
-      onClick={handleClick}
+      onClick={toggle}
     >
       <div className="flex-1">{children}</div>
       {expandIcon && (
         <div
-          className={`transition-transform duration-0 ${
+          className={`transition-transform duration-1000 ${
             expanded ? "rotate-180" : ""
           }`}
         >
@@ -78,20 +86,29 @@ export const AccordionSummary = ({
 
 interface AccordionDetailsProps {
   children: React.ReactNode;
-  expanded?: boolean;
   className?: string;
 }
 
 export const AccordionDetails = ({
   children,
-  expanded,
   className = "",
 }: AccordionDetailsProps) => {
-  if (!expanded) return null;
+  const context = useContext(AccordionContext);
+  if (!context) {
+    throw new Error("AccordionDetails must be used within Accordion");
+  }
+
+  const { expanded } = context;
+
+  console.log("AccordionDetails expanded:", expanded);
 
   return (
-    <div className={`p-4 border-t border-gray-200 ${className}`}>
-      {children}
+    <div
+      className={`border-t border-gray-200 overflow-hidden transition-all duration-1000 ease-in-out ${
+        expanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
+      }`}
+    >
+      <div className={`p-4 ${className}`}>{children}</div>
     </div>
   );
 };

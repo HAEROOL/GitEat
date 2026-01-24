@@ -105,7 +105,7 @@ function FileDiffContainer({
     if (!rawFile) return null;
 
     // The library's internal verification is very sensitive to trailing newlines.
-    // Standardizing both contents to end with exactly one newline is the most reliable way 
+    // Standardizing both contents to end with exactly one newline is the most reliable way
     // to ensure they match the default behavior of the patch generator (diff-match-patch / jsdiff).
     const normalize = (code: string | null) => {
       if (code === null || code === undefined || code === "") return "";
@@ -126,17 +126,17 @@ function FileDiffContainer({
         getFileType(file.oldPath),
         getFileType(file.newPath)
       );
-      
+
       // Perform initialization
       // We wrap it in a try-catch to catch the "mismatch" error if normalization wasn't enough.
       instance.initRaw();
       instance.buildSplitDiffLines();
       instance.buildUnifiedDiffLines();
-      
+
       return instance;
     } catch (e) {
       console.error("Failed to initialize diff instance:", e);
-      // If mismatch happens despite normalization, we can try to create a fallback 
+      // If mismatch happens despite normalization, we can try to create a fallback
       // but usually the error prevents proper line mapping for comments.
       return null;
     }
@@ -151,7 +151,9 @@ function FileDiffContainer({
         onClick={toggle}
       >
         <div className="flex items-center gap-3 w-full">
-          <h2 className="text-lg font-bold truncate">{file.newPath || file.oldPath}</h2>
+          <h2 className="text-lg font-bold truncate">
+            {file.newPath || file.oldPath}
+          </h2>
           <Chip
             label={statusInfo.label}
             color={statusInfo.color}
@@ -160,30 +162,40 @@ function FileDiffContainer({
           />
         </div>
         <ArrowDropDownIcon
-          className={`transition-transform duration-200 ${
+          className={`transition-transform duration-300 ${
             isExpand ? "rotate-180" : ""
           }`}
         />
       </div>
-      {isExpand && (
-        <div className="border-t border-gray-200">
-          <ErrorBoundary>
-            {diff ? (
-              <VirtualizedDiffViewer
-                diff={diff}
-                comments={comments.filter(
-                  (c: Comment) => c.fileId === file.fileId
-                )}
-                file={file}
-              />
-            ) : (
-              <div className="p-8 text-center text-gray-500 italic bg-gray-50">
-                {rawFile ? "Failed to process diff data. Content mismatch." : <Skeleton width="100%" height="100px" />}
-              </div>
-            )}
-          </ErrorBoundary>
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
+          isExpand ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="border-t border-gray-200">
+            <ErrorBoundary>
+              {diff ? (
+                <VirtualizedDiffViewer
+                  diff={diff}
+                  comments={comments.filter(
+                    (c: Comment) => c.fileId === file.fileId
+                  )}
+                  file={file}
+                />
+              ) : (
+                <div className="p-8 text-center text-gray-500 italic bg-gray-50">
+                  {rawFile ? (
+                    "Failed to process diff data. Content mismatch."
+                  ) : (
+                    <Skeleton width="100%" height="100px" />
+                  )}
+                </div>
+              )}
+            </ErrorBoundary>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

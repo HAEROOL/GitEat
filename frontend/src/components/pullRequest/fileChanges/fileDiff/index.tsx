@@ -1,9 +1,4 @@
 import { Chip } from "@mui/material";
-import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-} from "../../../common/Accordion";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { ErrorBoundary } from "../../../common/errorBoundery";
 import { DiffViewer } from "../diffViewer";
@@ -58,6 +53,8 @@ export function FileDiff({ repoId, prId, file }: FileProps) {
   const [isExpand, , , setReverse] = useBooleanState(false);
   const statusInfo = getFileStatusInfo(file.fileStatus);
 
+  console.log("FileDiff rendered for:", file.fileName, "isExpand:", isExpand);
+
   useEffect(() => {
     if (isExpand) {
       getFile(file);
@@ -92,17 +89,12 @@ export function FileDiff({ repoId, prId, file }: FileProps) {
   /* eslint-enable no-console */
 
   return (
-    <Accordion
-      id={file.fileId}
-      key={file.fileId}
-      expanded={isExpand}
-      className={`w-full ${statusInfo.bgColor}`}
-      onChange={() => setReverse()}
+    <div
+      className={`border border-gray-200 rounded-lg overflow-hidden mb-2 bg-white ${statusInfo.bgColor}`}
     >
-      <AccordionSummary
-        expandIcon={<ArrowDropDownIcon />}
-        id="panel1-header"
-        className="w-full"
+      <div
+        className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 select-none"
+        onClick={() => setReverse()}
       >
         <div className="flex items-center gap-3 w-full">
           <h2 className="text-lg font-bold truncate">{file.newPath}</h2>
@@ -113,21 +105,38 @@ export function FileDiff({ repoId, prId, file }: FileProps) {
             variant="outlined"
           />
         </div>
-      </AccordionSummary>
-      {rawFile && (
-        <AccordionDetails>
-          <ErrorBoundary>
-            {diff && (
-              <DiffViewer
-                diff={diff}
-                comments={comments.filter((comment) => comment.position)}
-                file={file}
-              />
-            )}
-          </ErrorBoundary>
-        </AccordionDetails>
-      )}
-    </Accordion>
+        <ArrowDropDownIcon
+          className={`transition-transform duration-300 ${
+            isExpand ? "rotate-180" : ""
+          }`}
+        />
+      </div>
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
+          isExpand ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="border-t border-gray-200 p-4">
+            <ErrorBoundary>
+              {rawFile ? (
+                diff && (
+                  <DiffViewer
+                    diff={diff}
+                    comments={comments.filter((comment) => comment.position)}
+                    file={file}
+                  />
+                )
+              ) : (
+                <div className="flex justify-center items-center py-8 text-gray-400">
+                  <span className="loading loading-spinner loading-md"></span>
+                </div>
+              )}
+            </ErrorBoundary>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
